@@ -85,10 +85,22 @@ def cli(args):
     return vars(parser.parse_args(args))
 
 
-def dump_pem(cert):
+def dump_pem(cert, outfile="ca-chain.crt"):
     """Use the CN to dump certificate to PEM format"""
-    print(cert.get_issuer().get_components())
-    print(cert.get_notAfter())
+    PyOpenSSL = requests.packages.urllib3.contrib.pyopenssl
+    pem_data = PyOpenSSL.OpenSSL.crypto.dump_certificate(PyOpenSSL.OpenSSL.crypto.FILETYPE_PEM, cert)
+    issuer = cert.get_issuer().get_components()
+
+    print(pem_data.decode("utf-8"))
+
+    with open(outfile, "a") as output:
+        for part in issuer:
+            output.write(part[0].decode("utf-8"))
+            output.write("=")
+            output.write(part[1].decode("utf-8"))
+            output.write(",\t")
+        output.write("\n")
+        output.write(pem_data.decode("utf-8"))
 
 
 if __name__ == "__main__":

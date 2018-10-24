@@ -74,14 +74,27 @@ Attempt to wrap in a somewhat usable CLI
 def cli(args):
     parser = argparse.ArgumentParser(description="Request any URL and dump the certificate chain")
     parser.add_argument("url", metavar="URL", type=str, nargs=1, help="Valid https URL to be handled by requests")
+
+    verify_parser = parser.add_mutually_exclusive_group(required=False)
+    verify_parser.add_argument("--verify", dest="verify", action="store_true", help="Explicitly set SSL verification")
+    verify_parser.add_argument(
+        "--no-verify", dest="verify", action="store_false", help="Explicitly disable SSL verification"
+    )
+    parser.set_defaults(verify=True)
+
     return vars(parser.parse_args(args))
+
+
+def dump_pem(cert):
+    """Use the CN to dump certificate to PEM format"""
+    print(cert.get_issuer().get_components())
+    print(cert.get_notAfter())
 
 
 if __name__ == "__main__":
     cli_args = cli(sys.argv[1:])
 
     url = cli_args["url"][0]
-    req = requests.get(url, verify=False)
+    req = requests.get(url, verify=cli_args["verify"])
     for cert in req.peercertchain:
-        print(cert.get_issuer().get_components())
-        print(cert.get_notAfter())
+        dump_pem(cert)

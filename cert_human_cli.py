@@ -1,28 +1,27 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-"""SSL Certificates for humans."""
+"""Command line interface to request a URL and get the server cert or cert chain."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cert_utils
+import cert_human
 import sys
 
 
 if __name__ == "__main__":
 
     def cli(argv):
-        parser = argparse.ArgumentParser(
-            description="Request a URL and get the server cert and server cert chain",
-        )
+        fmt = argparse.ArgumentDefaultsHelpFormatter
+        parser = argparse.ArgumentParser(description=__doc__, formatter_class=fmt)
         parser.add_argument(
             "host",
             metavar="HOST",
             action="store",
             type=str,
-            help="Host to get cert and cert chain from",
+            help="Host to get cert or cert chain from",
         )
         parser.add_argument(
             "--port",
@@ -33,32 +32,13 @@ if __name__ == "__main__":
             help="Port on host to connect to",
         )
         parser.add_argument(
-            "--timeout",
-            default=5,
-            action="store",
-            required=False,
-            type=int,
-            help="Timeout for connect",
-        )
-        parser.add_argument(
-            "--verify",
-            dest="verify",
-            action="store",
-            default=False,
-            required=False,
-            help="Use this cert when connecting to --host (only for --get_mode=requests)",
-        )
-        parser.add_argument(
-            "--get_mode",
-            dest="get_mode",
+            "--method",
+            dest="method",
             action="store",
             default="requests",
             required=False,
-            choices=["requests", "ssl", "socket"],
-            help=(
-                "Mode to use when retrieving the cert/cert chain. 'requests' to use requests.get "
-                "with cert patches applied. 'ssl' to use ssl.get_server_certificate."
-            ),
+            choices=["requests", "socket"],
+            help="Use requests.get a SSL socket to get cert or cert chain.",
         )
         parser.add_argument(
             "--chain",
@@ -75,15 +55,15 @@ if __name__ == "__main__":
             default="info",
             required=False,
             choices=["info", "key", "extensions", "all"],
-            help="When no --write_path specified, print this type of information for the cert."
+            help="When no --write specified, print this type of information for the cert."
         )
         parser.add_argument(
-            "--write_path",
-            dest="write_path",
+            "--write",
+            dest="write",
             action="store",
             default="",
             required=False,
-            help="Write server certificate to this file",
+            help="File to write cert/cert chain to",
         )
         parser.add_argument(
             "--overwrite",
@@ -91,42 +71,58 @@ if __name__ == "__main__":
             action="store_true",
             default=False,
             required=False,
-            help="When writing to --write_path and file exists, overwrite.",
+            help="When writing to --write and file exists, overwrite.",
+        )
+        parser.add_argument(
+            "--verify",
+            dest="verify",
+            action="store",
+            default="",
+            required=False,
+            help="PEM file to verify host, empty will disable verify, for --method requests.",
         )
         return parser.parse_args(argv)
 
     cli_args = cli(argv=sys.argv[1:])
 
-    print_map = {
-        "info": "dump_str_info",
-        "key": "dump_str_key",
-        "all": "dump_str",
-        "extensions": "dump_str_exts",
-    }
-
-    response = cert_utils.get_response(
-        host=cli_args.host,
-        port=cli_args.port,
-        verify=cli_args.verify,
-        timeout=cli_args.timeout,
-    )
-
-    cert = cert_utils.CertX509Store.new_from_response_obj(response)
-    cert_chain = cert_utils.CertX509ChainStore.new_from_response_obj(response)
     if cli_args.chain:
-        target = cert_chain
-        target_txt = "cert chain"
+        store_cls = cert_human.CertChainStore
+        store_target = "cert chain"
     else:
-        target = cert
-        target_txt = "cert"
+        store_cls = cert_human.CertStore
+        store_target = "cert"
 
-    if cli_args.write_path:
-        target.pem_to_disk(path=cli_args.write_path, overwrite=cli_args.overwrite)
-        m = "** Wrote {t} in pem format to: '{p}'"
-        m = m.format(t=target_txt, p=cli_args.write_path)
-        print(m)
-    else:
-        mode_out = getattr(target, print_map[cli_args.print_mode])
-        m = "Printing {m} for {t}:\n{o}"
-        m = m.format(m=cli_args.print_mode, t=target_txt, o=mode_out)
-        print(m)
+    if cli_args.method == "requests":
+        verify = False if not cli_args.verify else cli_args.verify
+        try:
+            store_obj = store_cls.new_from_host_requests(
+                host=cli_args.host,
+                port=cli_args.port,
+                verify=verify,
+            )
+        except cert_human.requests.exceptions.SSLError as exc:
+            exc = "\n  ".join([x.strip() for x in format(exc).split(":")])
+            m = "SSL Validation Failed:\n  {exc}".format(exc=exc)
+            print(m)
+            store_obj = None
+    elif cli_args.method == "socket":
+        store_obj = store_cls.new_from_host_socket(
+            host=cli_args.host,
+            port=cli_args.port,
+        )
+
+    if store_obj:
+        if cli_args.write:
+            store_obj.to_disk(path=cli_args.write, overwrite=cli_args.overwrite)
+            m = "** Wrote {t} in pem format to: '{p}'"
+            m = m.format(t=store_target, p=cli_args.write)
+            print(m)
+        else:
+            print_map = {
+                "info": "dump_str_info",
+                "key": "dump_str_key",
+                "all": "dump_str",
+                "extensions": "dump_str_exts",
+            }
+            mode_out = getattr(store_obj, print_map[cli_args.print_mode])
+            print(mode_out)

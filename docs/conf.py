@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import sys
 
-# import sphinx_bootstrap_theme
+import sphinx_bootstrap_theme
 
 try:
     import pathlib
@@ -25,7 +25,7 @@ project = pkg.__name__
 author = pkg.__author__
 version = pkg.__version__
 release = pkg.__version__
-copyright = "2018, Jim Olsen"
+copyright = pkg.__copyright__
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -65,7 +65,7 @@ autodoc_default_options = {
 }
 
 html_theme = 'bootstrap'
-# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
     # 'navbar_title': "Demo",

@@ -18,7 +18,7 @@ except Exception:
 THIS_FILE = pathlib.Path(__file__).absolute()
 THIS_PATH = THIS_FILE.parent
 TOOL_PATH = THIS_PATH.parent
-OUTPUT_PATH = "~/{p}/docs".format(p=TOOL_PATH.name)
+OUTPUT_PATH = THIS_PATH / "_build"  # "~/{p}/docs".format(p=TOOL_PATH.name)
 
 if TOOL_PATH not in sys.path:
     sys.path.insert(0, format(TOOL_PATH))

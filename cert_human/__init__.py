@@ -20,6 +20,10 @@ from contextlib import contextmanager
 from requests.packages.urllib3.contrib import pyopenssl
 from requests.packages import urllib3
 
+from .__version__ import __title__, __description__, __url__, __version__  # noqa
+from .__version__ import __author__, __author_email__, __license__  # noqa
+from .__version__ import __copyright__  # noqa
+
 try:
     import pathlib
 except Exception:
@@ -31,10 +35,6 @@ ASN1_TYPE = pyopenssl.OpenSSL.crypto.FILETYPE_ASN1
 HTTPSConnectionPool = urllib3.connectionpool.HTTPSConnectionPool
 ConnectionCls = HTTPSConnectionPool.ConnectionCls
 ResponseCls = HTTPSConnectionPool.ResponseCls
-
-__version__ = "1.0.0"
-__author__ = "Jim Olsen <jimbosan@gmail.com>"
-__copyright__ = "Copyright (c) 2018, Jim Olsen"
 
 
 class HTTPSConnectionWithCert(ConnectionCls):

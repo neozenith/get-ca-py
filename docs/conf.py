@@ -1,9 +1,9 @@
-"""Sphinx conf.py for Tanium documentation."""
+"""Sphinx conf.py."""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 
-import sphinx_bootstrap_theme
+# import sphinx_bootstrap_theme
 
 try:
     import pathlib
@@ -65,7 +65,7 @@ autodoc_default_options = {
 }
 
 html_theme = 'bootstrap'
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
     # 'navbar_title': "Demo",

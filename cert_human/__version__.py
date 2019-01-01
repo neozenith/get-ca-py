@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 __title__ = "cert_human"
 __description__ = "SSL Certificates for Humans."
 __url__ = "https://github.com/lifehackjim/cert_human"
-__version__ = "1.0.0"
+__version__ = "1.0.3"
 __author__ = "Jim Olsen"
 __author_email__ = "jimbosan@gmail.com"
 __license__ = "MIT"

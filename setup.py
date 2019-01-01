@@ -22,7 +22,7 @@ about = {}
 with open(version_path, 'r', 'utf-8') as f:
     exec(f.read(), about)
 
-with open('README.rst', 'r', 'utf-8') as f:
+with open('README.md', 'r', 'utf-8') as f:
     readme = f.read()
 
 
@@ -71,7 +71,7 @@ setup(
     version=about['__version__'],
     description=about['__description__'],
     long_description=readme,
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],

@@ -29,8 +29,9 @@ I then wanted an easier, more *human* way of accessing all of the information in
 Installation
 **************************
 
-pip blah blah blah
+.. code-block:: console
 
+    $ pip install cert_human
 
 **************************
 TODO items

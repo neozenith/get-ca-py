@@ -21,11 +21,11 @@ import cert_human as pkg  # noqa
 
 # sphinx config ref: http://www.sphinx-doc.org/en/master/usage/configuration.html
 
-project = pkg.__name__
+project = "Cert Human"
 author = pkg.__author__
 version = pkg.__version__
 release = pkg.__version__
-copyright = pkg.__copyright__
+copyright = "2018, Jim Olsen"
 
 extensions = [
     "sphinx.ext.autodoc",

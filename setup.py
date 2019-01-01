@@ -11,7 +11,9 @@ from shutil import rmtree
 
 from codecs import open
 
-from setuptools import setup, Command, find_packages
+from setuptools import setup
+from setuptools import Command
+# from setuptools import find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 version_path = os.path.join(here, 'cert_human', '__version__.py')
@@ -62,7 +64,7 @@ class UploadCommand(Command):
 
 
 packages = ['cert_human']
-packages = find_packages()
+# packages = find_packages()
 
 setup(
     name=about['__title__'],
